@@ -267,6 +267,18 @@ async function doLookup(){
   const ip = $('ipInput').value.trim();
   $('errBox').innerHTML = '';
   $('lookupBtn').disabled = true;
+
+  // Sync IP to URL hash
+  if(ip) {
+    if(window.location.hash !== '#' + ip) {
+      window.location.hash = ip;
+    }
+  } else {
+    if(window.location.hash !== '' && window.location.hash !== '#') {
+      window.location.hash = '';
+    }
+  }
+
   try{
     const d = await fetchIpInfo(ip || undefined);
     render(d);
@@ -278,6 +290,31 @@ async function doLookup(){
 }
 $('lookupBtn').onclick = doLookup;
 $('ipInput').addEventListener('keydown', e => { if(e.key==='Enter') doLookup(); });
+
+// Hash routing logic
+function checkHashLookup(){
+  const hashIp = window.location.hash.substring(1).trim();
+  if (hashIp) {
+    $('ipInput').value = hashIp;
+    doLookup();
+  }
+}
+
+window.addEventListener('hashchange', () => {
+  const hashIp = window.location.hash.substring(1).trim();
+  if (hashIp !== $('ipInput').value.trim()) {
+    $('ipInput').value = hashIp;
+    if (hashIp) {
+      doLookup();
+    } else {
+      $('results').classList.remove('show');
+      $('errBox').innerHTML = '';
+    }
+  }
+});
+
+// Run initial check
+checkHashLookup();
 </script>
 </body>
 </html>
